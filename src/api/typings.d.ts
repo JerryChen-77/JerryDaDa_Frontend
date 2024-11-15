@@ -162,6 +162,11 @@ declare namespace API {
     id?: number;
   };
 
+  type getQuestionVOByAppIdUsingGETParams = {
+    /** appId */
+    appId?: number;
+  };
+
   type getQuestionVOByIdUsingGETParams = {
     /** id */
     id?: number;

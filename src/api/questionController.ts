@@ -62,6 +62,21 @@ export async function getQuestionVoByIdUsingGet(
   });
 }
 
+/** getQuestionVOByAppId GET /api/question/get/vo/byAppId */
+export async function getQuestionVoByAppIdUsingGet(
+  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
+  params: API.getQuestionVOByAppIdUsingGETParams,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseQuestionVO_>("/api/question/get/vo/byAppId", {
+    method: "GET",
+    params: {
+      ...params,
+    },
+    ...(options || {}),
+  });
+}
+
 /** listQuestionVOByPage POST /api/question/list/page/vo */
 export async function listQuestionVoByPageUsingPost(
   body: API.QuestionQueryRequest,

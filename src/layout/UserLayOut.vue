@@ -3,12 +3,12 @@
     <a-layout style="min-height: 100vh">
       <a-layout-header class="header">
         <a-space>
-          <img src="../assets/ai.png" class="logo" />
+          <img class="logo" src="../assets/ai.png"/>
           <div>JERRY AI 答题应用平台</div>
         </a-space>
       </a-layout-header>
       <a-layout-content class="content">
-        <router-view />
+        <router-view/>
       </a-layout-content>
       <a-layout-footer class="footer">
         <a href="https://github.com/JerryChen-77" target="_blank">
