@@ -115,22 +115,33 @@ const router = useRouter();
  */
 const handleSubmit = async () => {
   let res : any;
-  if (props.id) {
+  if (props.id!==":id") {
     res = await editAppUsingPost({
       id:props.id as any,
       ... form.value,
     });
+
+    if (res.data.code === 0) {
+      message.success("操作成功,即将跳转到应用详情页");
+      setTimeout(()=>{
+            router.push(`/app/detail/${props.id || res.data.data}`)}
+          ,2000);
+    } else {
+      message.error("操作失败" + res.data.message);
+    }
   }else {
     res = await addAppUsingPost(form.value);
+
+    if (res.data.code === 0) {
+      message.success("操作成功,待管理员审核后可见");
+      setTimeout(()=>{
+            router.push("/home")}
+          ,2000);
+    } else {
+      message.error("操作失败" + res.data.message);
+    }
   }
-  // 登录成功，跳转到主页
-  if (res.data.code === 0) {
-    message.success("操作成功,即将跳转到应用详情页");
-    setTimeout(()=>{
-     router.push(`/app/detail/${props.id ?? res.data.data}`)}
-        ,2000);
-  } else {
-    message.error("操作失败" + res.data.message);
-  }
+
+
 };
 </script>

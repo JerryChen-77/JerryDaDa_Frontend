@@ -63,7 +63,7 @@ import API from "@/api";
 import message from "@arco-design/web-vue/es/message";
 import {addScoringResultUsingPost, updateScoringResultUsingPost} from "@/api/scoringResultController";
 import { defineProps, withDefaults } from "vue/dist/vue";
-import ScoringResultTable from "@/components/ScoringResultTable.vue";
+import ScoringResultTable from "@/views/add/components/ScoringResultTable.vue";
 import {update} from "lodash-es";
 
 interface Props {

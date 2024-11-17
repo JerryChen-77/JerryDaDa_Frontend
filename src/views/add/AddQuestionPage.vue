@@ -1,7 +1,7 @@
 <template>
   <div id="AddAppPage">
 
-    <h2 style="margin-bottom: 32px" >设置题目</h2>
+    <h2 style="margin-bottom: 32px">设置题目</h2>
     <a-form
         style="max-width: 480px; margin: 0 auto"
         label-align="left"
@@ -9,13 +9,24 @@
         :model="questionContent"
         @submit="handleSubmit"
     >
-        <a-form-item label="应用Id">
-          {{ appId }}
-        </a-form-item>
+      <a-form-item label="应用Id">
+        {{ appId }}
+      </a-form-item>
       <a-form-item label="题目列表" :content-flex="false" :merge-props="false">
-        <a-button @click="addQuestion(questionContent.length)">
-          底部添加题目
-        </a-button>
+        <a-space size="medium">
+          <a-button @click="addQuestion(questionContent.length)">
+            底部添加题目
+          </a-button>
+          <!-- AI 生成题目抽屉 -->
+          <AiGenerateQuestionDrawer
+              :appId="appId"
+              :onSuccess="onAiGenerateSuccess"
+              :onSSESuccess="onSSESuccess"
+              :onSSEClose="onSSEClose"
+              :onSSEStart="onSSEStart"
+          />
+        </a-space>
+
         <!-- 遍历每道题目 -->
         <div v-for="(question, index) of questionContent" :key="index">
           <!-- 题目信息展示 -->
@@ -33,7 +44,7 @@
             </a-button>
           </a-space>
           <a-form-item :label="`题目 ${index + 1} 标题`">
-            <a-input v-model="question.title" placeholder="请输入标题" />
+            <a-input v-model="question.title" placeholder="请输入标题"/>
           </a-form-item>
           <!-- 展示题目选项 -->
           <a-space size="large">
@@ -54,13 +65,13 @@
               :merge-props="false"
           >
             <a-form-item label="选项 key">
-              <a-input v-model="option.key" placeholder="请输入选项 key" />
+              <a-input v-model="option.key" placeholder="请输入选项 key"/>
             </a-form-item>
             <a-form-item label="选项值">
-              <a-input v-model="option.value" placeholder="请输入选项值" />
+              <a-input v-model="option.value" placeholder="请输入选项值"/>
             </a-form-item>
             <a-form-item label="选项结果">
-              <a-input v-model="option.result" placeholder="请输入选项结果" />
+              <a-input v-model="option.result" placeholder="请输入选项结果"/>
             </a-form-item>
             <a-form-item label="选项得分">
               <a-input-number
@@ -88,25 +99,20 @@
         </div>
       </a-form-item>
       <a-button type="primary" html-type="submit" style="width: 120px">
-          提交
-        </a-button>
+        提交
+      </a-button>
 
     </a-form>
   </div>
 </template>
 
 <script setup lang="ts">
-import {reactive, ref, watchEffect} from "vue";
+import {ref, watchEffect} from "vue";
 import message from "@arco-design/web-vue/es/message";
 import {useRouter} from "vue-router";
-import {useLoginUserStore} from "@/store/userStore";
 import API from "@/api";
-import {addAppUsingPost, editAppUsingPost, getAppVoByIdUsingGet, updateAppUsingPost} from "@/api/appController";
-import {
-  addQuestionUsingPost, editQuestionUsingPost,
-  getQuestionVoByAppIdUsingGet,
-  listQuestionVoByPageUsingPost
-} from "@/api/questionController";
+import {addQuestionUsingPost, editQuestionUsingPost, listQuestionVoByPageUsingPost} from "@/api/questionController";
+import AiGenerateQuestionDrawer from "@/views/add/components/AiGenerateQuestionDrawer.vue";
 
 interface Props {
   appId: string;
@@ -148,7 +154,7 @@ watchEffect(() => {
 });
 
 // 获取旧应用的数据
-watchEffect(()=>{
+watchEffect(() => {
   loadData();
 })
 
@@ -238,6 +244,27 @@ const handleSubmit = async () => {
     message.error("创建失败，" + res.data.message);
   }
 };
+/**
+ * AI
+ * @param result
+ */
+const onAiGenerateSuccess = (result: API.QuestionContentDTO[]) => {
+  questionContent.value = [...questionContent.value, ...result];
+  message.success(`AI 生成题目成功，已新增 ${result.length} 道题目`);
+};
 
+/**
+ * AI实时生成
+ */
 
+const onSSESuccess = (event: any) => {
+  questionContent.value = [...questionContent.value, event]
+}
+const onSSEStart=(event:any)=>{
+  message.info("开始生成题目")
+}
+
+const onSSEClose=(event:any)=>{
+  message.warning("题目生成结束")
+}
 </script>

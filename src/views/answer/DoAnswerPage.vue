@@ -31,9 +31,10 @@
               v-if="current === questionContent.length"
               circle
               :disabled="!currentAnswer"
+              :loading="submitting"
               @click="doSubmit"
           >
-            查看结果
+            {{ submitting ? "评分中":"查看结果" }}
           </a-button>
           <a-button v-if="current > 1" circle @click="current -= 1">
             上一题
@@ -49,7 +50,12 @@ import {computed, reactive, ref, watch, watchEffect} from "vue";
 import message from "@arco-design/web-vue/es/message";
 import {useRouter} from "vue-router";
 import API from "@/api";
-import {addQuestionUsingPost, editQuestionUsingPost, listQuestionVoByPageUsingPost} from "@/api/questionController";
+import {
+  addQuestionUsingPost,
+  editQuestionUsingPost,
+  generateUniqueUserAnswerIdUsingGet,
+  listQuestionVoByPageUsingPost
+} from "@/api/questionController";
 import {getAppVoByIdUsingGet} from "@/api/appController";
 import {addUserAnswerUsingPost} from "@/api/userAnswerController";
 
@@ -76,11 +82,28 @@ const questionOptions = computed(() => {
       : [];
 });
 
+// 是否正在提交
+const submitting = ref(false);
 // 当前答案
 const currentAnswer = ref<string>();
 // 回答列表
 const answerList = reactive<string[]>([]);
 
+// 进入做题页面就获取唯一Id
+const uniqueId = ref<number>();
+
+const generateId = async () => {
+  const res = await generateUniqueUserAnswerIdUsingGet();
+  if(res.data.code === 0) {
+    uniqueId.value = res.data.data as any;
+  } else {
+    message.error("获取唯一Id失败，" + res.data.message);
+  }
+}
+// 进入页面时生成唯一id
+watchEffect(()=>{
+  generateId();
+})
 const loadData = async () => {
   if (!props.appId) {
     return;
@@ -106,7 +129,6 @@ const loadData = async () => {
     message.error("获取题目失败，" + res.data.message);
   }
 };
-
 // 获取数据
 watchEffect(()=>{
   loadData();
@@ -134,16 +156,23 @@ const onRadioChange = (value: string) => {
  */
 const doSubmit = async () => {
 
+  if(!props.appId|| !answerList){
+    return;
+  }
+  submitting.value = true;
   const res = await addUserAnswerUsingPost({
+    id:uniqueId.value,
     appId: props.appId as any,
     choices: answerList,
   });
+
 
   if (res.data.code === 0 && res.data.data) {
     await router.push(`/answer/result/${res.data.data}`);
   } else {
     message.error("提交答案失败，" + res.data.message);
   }
+  submitting.value = false;
 };
 
 

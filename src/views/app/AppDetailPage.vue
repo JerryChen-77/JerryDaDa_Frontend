@@ -21,7 +21,7 @@
               <a-button type="primary" :href="`/answer/do/${props.id}`">
                 开始答题
               </a-button>
-              <a-button>分享应用</a-button>
+              <a-button @click="doShare">分享应用</a-button>
               <a-button v-if="isMy" :href="`/add/question/${id}`">
                 设置题目
               </a-button>
@@ -40,6 +40,7 @@
       </a-row>
     </a-card>
   </div>
+  <ShareModal :link="shareLink" title="应用分享" ref="shareModalRef" />
 
 </template>
 
@@ -49,6 +50,7 @@ import message from "@arco-design/web-vue/es/message";
 import {computed, ref, watchEffect} from "vue";
 import dayjs from "dayjs";
 import {useLoginUserStore} from "@/store/userStore";
+import ShareModal from "@/components/ShareModal.vue";
 
 const data = ref<API.AppVO>();
 
@@ -97,6 +99,18 @@ const loginUserId = loginUserStore.loginUser.id;
 const isMy = computed(() => {
   return loginUserId && loginUserId === data.value?.user?.id;
 });
+
+// 分享弹窗引用
+const shareModalRef = ref();
+// 分享链接
+const shareLink = `${window.location.protocol}//${window.location.host}/app/detail/${props.id}`;
+// 分享
+const doShare = (e: Event) => {
+  if (shareModalRef.value) {
+    shareModalRef.value.openModal();
+  }
+  e.stopPropagation();
+};
 
 </script>
 

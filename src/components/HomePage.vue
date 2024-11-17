@@ -41,6 +41,7 @@ import {
 } from "@/api/appController";
 import message from "@arco-design/web-vue/es/message";
 import {ref, watchEffect} from "vue";
+import ShareModal from "@/components/ShareModal.vue";
 
 const dataList = ref<API.AppVO[]>([]);
 const total = ref<number>(0);
