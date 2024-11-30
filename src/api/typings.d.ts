@@ -77,6 +77,15 @@ declare namespace API {
     userId?: number;
   };
 
+  type AppThumbAddRequest = {
+    appId?: number;
+  };
+
+  type AppThumbVO = {
+    appThumbNum?: number;
+    hasThumbed?: boolean;
+  };
+
   type AppUpdateRequest = {
     appDesc?: string;
     appIcon?: string;
@@ -101,9 +110,16 @@ declare namespace API {
     reviewTime?: string;
     reviewerId?: number;
     scoringStrategy?: number;
+    thumbNum?: number;
     updateTime?: string;
     user?: UserVO;
     userId?: number;
+  };
+
+  type BaseResponseAppThumbVO_ = {
+    code?: number;
+    data?: AppThumbVO;
+    message?: string;
   };
 
   type BaseResponseAppVO_ = {
@@ -115,6 +131,12 @@ declare namespace API {
   type BaseResponseBoolean_ = {
     code?: number;
     data?: boolean;
+    message?: string;
+  };
+
+  type BaseResponseInt_ = {
+    code?: number;
+    data?: number;
     message?: string;
   };
 

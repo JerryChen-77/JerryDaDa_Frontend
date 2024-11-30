@@ -1,7 +1,8 @@
 <template>
   <a-card class="appCard" hoverable @click="doCardClick">
     <template #actions>
-      <span class="icon-hover"> <IconThumbUp/> </span>
+      <span class="icon-hover" @click="doThumb" v-if="!hasThumbed"> <IconThumbUp/><span>{{ thumbNum }}</span></span>
+      <span class="icon-hover" @click="doThumb" v-if="hasThumbed"> <IconThumbUpFill :style="{color:'#0000FF'}"/><span>{{ thumbNum }}</span></span>
       <span class="icon-hover" @click="doShare"> <IconShareInternal/> </span>
     </template>
     <template #cover>
@@ -35,15 +36,19 @@
 </template>
 
 <script setup lang="ts">
-import {IconShareInternal, IconThumbUp,} from '@arco-design/web-vue/es/icon';
+import {IconShareInternal, IconThumbUp,IconThumbUpFill} from '@arco-design/web-vue/es/icon';
 import API from "@/api"
-import {defineProps, ref, withDefaults} from "vue";
+import {defineProps, ref, watchEffect, withDefaults} from "vue";
 import {useRouter} from "vue-router";
 import ShareModal from "@/components/ShareModal.vue";
+import message from "@arco-design/web-vue/es/message";
+import {doThumbUsingPost, hasThumbedUsingPost} from "@/api/appThumbController";
+import {listAppVoByPageUsingPost} from "@/api/appController";
 
 interface Props {
   app : API.AppVO;
 }
+const ThumbNum = ref(0);
 const props = withDefaults(defineProps<Props>(),{
   app:()=>{
     return {};
@@ -54,7 +59,6 @@ const router = useRouter();
 const doCardClick = () => {
   router.push(`/app/detail/${props.app.id}`);
 };
-
 
 // 分享弹窗引用
 const shareModalRef = ref();
@@ -68,23 +72,46 @@ const doShare = (e: Event) => {
   e.stopPropagation();
 };
 
+const hasThumbed = ref(false);
+const thumbNum = ref(0);
+const doThumb =async (e: Event) => {
+  e.stopPropagation();
+  await doThumbUsingPost({
+    appId: props.app.id
+  })
+  message.info("点赞成功");
+  await loadThumb();
+}
 
+const loadThumb = async () => {
+  const res = await hasThumbedUsingPost({
+    appId: props.app.id
+  })
+  if(res.data.code == 0){
+    hasThumbed.value = res.data.data.hasThumbed;
+    thumbNum.value = res.data.data.appThumbNum;
+  }else {
+    message.warning(res.data.message)
+  }
+}
+
+watchEffect(() => {
+  loadThumb();
+})
 </script>
 <style scoped>
 .appCard {
   cursor: pointer;
 }
+
 .icon-hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   transition: all 0.1s;
 }
 
-.icon-hover:hover {
-  background-color: rgb(var(--gray-2));
-}
 </style>
