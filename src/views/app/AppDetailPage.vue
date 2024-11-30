@@ -25,7 +25,7 @@
               <a-button v-if="isMy" :href="`/add/question/${id}`">
                 设置题目
               </a-button>
-              <a-button v-if="isMy" :href="`/add/scoring_result/${id}`">
+              <a-button v-if="isMy&&data?.scoringStrategy==0" :href="`/add/scoring_result/${id}`">
                 设置评分
               </a-button>
               <a-button v-if="isMy" :href="`/add/app/${id}`">

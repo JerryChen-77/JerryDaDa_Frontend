@@ -19,6 +19,14 @@ declare namespace API {
     questionNumber?: number;
   };
 
+  type AiGenerateScoringResultRequest = {
+    appId?: number;
+    resultDesc?: string;
+    resultName?: string;
+    resultProp?: string;
+    resultScoreRange?: number;
+  };
+
   type answerResultCountUsingGETParams = {
     /** appId */
     appId?: number;
@@ -125,6 +133,12 @@ declare namespace API {
   type BaseResponseListQuestionContentDTO_ = {
     code?: number;
     data?: QuestionContentDTO[];
+    message?: string;
+  };
+
+  type BaseResponseListScoringResultVO_ = {
+    code?: number;
+    data?: ScoringResultVO[];
     message?: string;
   };
 

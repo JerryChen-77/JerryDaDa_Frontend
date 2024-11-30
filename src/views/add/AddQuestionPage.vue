@@ -1,6 +1,20 @@
 <template>
   <div id="AddAppPage">
 
+    <!-- 左侧腾出的空间 -->
+    <div style="width: 200px; float: left;  height: 100vh;">
+      <div style="position: fixed">
+        <h4>
+          快速定位您的题目
+        </h4>
+        <a-anchor style="position: fixed">
+          <a-anchor-link v-for="(question, index) of questionContent" :key="index" :href="'#question' + (index + 1)">
+            题目{{ index + 1 }}
+          </a-anchor-link>
+        </a-anchor>
+      </div>
+
+    </div>
     <h2 style="margin-bottom: 32px">设置题目</h2>
     <a-form
         style="max-width: 480px; margin: 0 auto"
@@ -28,9 +42,9 @@
         </a-space>
 
         <!-- 遍历每道题目 -->
-        <div v-for="(question, index) of questionContent" :key="index">
+        <div id="questions" v-for="(question, index) of questionContent" :key="index">
           <!-- 题目信息展示 -->
-          <a-space size="large">
+          <a-space :id="'question' + (index+1)" size="large">
             <h3>题目 {{ index + 1 }}</h3>
             <a-button size="mini" @click="addQuestion(index + 1)">
               添加题目

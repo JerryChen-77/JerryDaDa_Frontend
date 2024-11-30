@@ -17,6 +17,24 @@ export async function addScoringResultUsingPost(
   });
 }
 
+/** aiGenerateScoringResult POST /api/scoringResult/ai_generate_scoring_result */
+export async function aiGenerateScoringResultUsingPost(
+  body: API.AiGenerateScoringResultRequest,
+  options?: { [key: string]: any }
+) {
+  return request<API.BaseResponseListScoringResultVO_>(
+    "/api/scoringResult/ai_generate_scoring_result",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      data: body,
+      ...(options || {}),
+    }
+  );
+}
+
 /** deleteScoringResult POST /api/scoringResult/delete */
 export async function deleteScoringResultUsingPost(
   body: API.DeleteRequest,
