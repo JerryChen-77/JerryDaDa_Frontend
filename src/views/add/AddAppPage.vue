@@ -16,16 +16,16 @@
         <a-input v-model="form.appDesc" placeholder="请输入应用描述"/>
       </a-form-item>
 
-      <a-form-item field="appIcon" label="应用图标">
-        <a-input v-model="form.appIcon" placeholder="请输入应用图标"/>
-      </a-form-item>
-      <!--      <a-form-item field="appIcon" label="应用图标">-->
-      <!--        <PictureUploader-->
-      <!--            biz="app_icon"-->
-      <!--            :value="form.appIcon"-->
-      <!--            :onChange="(url) => (form.appIcon = url)"-->
-      <!--        />-->
+<!--      <a-form-item field="appIcon" label="应用图标">-->
+      <!--        <a-input v-model="form.appIcon" placeholder="请输入应用图标"/>-->
       <!--      </a-form-item>-->
+            <a-form-item field="appIcon" label="应用图标">
+              <PictureUploader
+                  biz="app_icon"
+                  :value="form.appIcon"
+                  :onChange="(url) => (form.appIcon = url)"
+              />
+            </a-form-item>
       <a-form-item field="appType" label="应用类型">
         <a-select v-model="form.appType">
           <a-option v-for="(value ,key) of APP_TYPE_MAP" :value="Number(key)" :label="value"/>
@@ -54,6 +54,7 @@ import {useRouter} from "vue-router";
 import {useLoginUserStore} from "@/store/userStore";
 import API from "@/api";
 import {addAppUsingPost, editAppUsingPost, getAppVoByIdUsingGet, updateAppUsingPost} from "@/api/appController";
+import PictureUploader from "@/components/PictureUploader.vue";
 
 
 interface Props {
@@ -135,7 +136,7 @@ const handleSubmit = async () => {
     if (res.data.code === 0) {
       message.success("操作成功,待管理员审核后可见");
       setTimeout(()=>{
-            router.push("/home")}
+            router.push("/")}
           ,2000);
     } else {
       message.error("操作失败" + res.data.message);

@@ -27,6 +27,8 @@
   </div>
 
 
+
+
 </template>
 
 <script setup lang="ts">
@@ -42,6 +44,7 @@ import {
 import message from "@arco-design/web-vue/es/message";
 import {ref, watchEffect} from "vue";
 import ShareModal from "@/components/ShareModal.vue";
+import PictureUploader from "@/components/PictureUploader.vue";
 
 const dataList = ref<API.AppVO[]>([]);
 const total = ref<number>(0);
