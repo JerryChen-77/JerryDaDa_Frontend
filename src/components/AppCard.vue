@@ -79,7 +79,6 @@ const doThumb =async (e: Event) => {
   await doThumbUsingPost({
     appId: props.app.id
   })
-  message.info("点赞成功");
   await loadThumb();
 }
 

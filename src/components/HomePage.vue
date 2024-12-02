@@ -63,6 +63,7 @@ const searchParams = ref<API.AppQueryRequest>({
 const loadData = async () => {
   const params = {
     reviewStatus: 1,
+    sortField: 'thumbNum',
     ...searchParams.value,
   }
   const res = await listAppVoByPageUsingPost(params)
