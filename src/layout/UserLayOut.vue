@@ -2,6 +2,7 @@
   <div id="userLayout">
     <a-layout style="min-height: 100vh">
       <a-layout-header class="header">
+
         <a-space>
           <img class="logo" src="../assets/ai.png"/>
           <div>JERRY AI 答题应用平台</div>

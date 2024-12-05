@@ -19,6 +19,7 @@ import MyAnswerPage from "@/views/answer/MyAnswerPage.vue";
 import DoAnswerPage from "@/views/answer/DoAnswerPage.vue";
 import AnswerResultPage from "@/views/app/AnswerResultPage.vue";
 import AppStatisticPage from "@/views/statistic/AppStatisticPage.vue";
+import MyAppPage from "@/views/user/MyAppPage.vue";
 
 export const routes: Array<RouteRecordRaw> = [
     {
@@ -176,4 +177,12 @@ export const routes: Array<RouteRecordRaw> = [
             access: ACCESS_ENUM.USER,
         },
     },
+    {
+        path: "/app/my",
+        name: "我的应用",
+        component: MyAppPage,
+        meta: {
+            access: ACCESS_ENUM.USER,
+        },
+    }
 ];

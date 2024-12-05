@@ -80,55 +80,55 @@
 
 
 
-    <!-- 抽屉组件 -->
-    <a-drawer
-        v-model:visible="updateDrawerVisible"
-        title="修改用户"
-        placement="right"
-        width="90%"
-    ><!-- 抽屉中的表单组件 -->
-      <a-form
-          :model="currentSUserAnswer"
-          label-align="left"
-          auto-label-width
-          layout="vertical"
-      >
-        <a-form-item disabled field="id" label="ID">
-          <a-input v-model="currentSUserAnswer.id" placeholder="请输入ID" />
-        </a-form-item>
-        <a-form-item disabled field="userAccount" label="用户账号">
-          <a-input v-model="currentSUserAnswer.userAccount" placeholder="请输入用户账号" />
-        </a-form-item>
-        <a-form-item field="userName" label="用户名">
-          <a-input v-model="currentSUserAnswer.userName" placeholder="请输入用户名" />
-        </a-form-item>
-        <a-form-item field="userAvatar" label="用户头像">
-          <a-input v-model="currentSUserAnswer.userAvatar" placeholder="请输入用户头像" />
-        </a-form-item>
-        <a-form-item field="userProfile" label="用户简介" >
-          <a-input type="text" v-model="currentSUserAnswer.userProfile" placeholder="请输入用户简介" style="height: 96px"/>
-        </a-form-item>
-        <a-form-item field="userRole" label="用户角色">
-          <a-select v-model="currentSUserAnswer.userRole" placeholder="请选择用户角色">
-            <a-option value="admin">admin</a-option>
-            <a-option value="user">user</a-option>
-          </a-select>
-        </a-form-item>
-        <a-form-item disabled field="createTime" label="创建时间">
-          <a-input v-model="currentSUserAnswer.createTime" placeholder="请输入创建时间" />
-        </a-form-item>
-        <a-form-item disabled field="updateTime" label="更新时间">
-          <a-input v-model="currentSUserAnswer.updateTime" placeholder="请输入更新时间" />
-        </a-form-item>
-      </a-form>
+  <!-- 抽屉组件 -->
+  <a-drawer
+      v-model:visible="updateDrawerVisible"
+      title="修改用户"
+      placement="right"
+      width="90%"
+  ><!-- 抽屉中的表单组件 -->
+    <a-form
+        :model="currentSUserAnswer"
+        label-align="left"
+        auto-label-width
+        layout="vertical"
+    >
+      <a-form-item disabled field="id" label="ID">
+        <a-input v-model="currentSUserAnswer.id" placeholder="请输入ID" />
+      </a-form-item>
+      <a-form-item disabled field="userAccount" label="用户账号">
+        <a-input v-model="currentSUserAnswer.userAccount" placeholder="请输入用户账号" />
+      </a-form-item>
+      <a-form-item field="userName" label="用户名">
+        <a-input v-model="currentSUserAnswer.userName" placeholder="请输入用户名" />
+      </a-form-item>
+      <a-form-item field="userAvatar" label="用户头像">
+        <a-input v-model="currentSUserAnswer.userAvatar" placeholder="请输入用户头像" />
+      </a-form-item>
+      <a-form-item field="userProfile" label="用户简介" >
+        <a-input type="text" v-model="currentSUserAnswer.userProfile" placeholder="请输入用户简介" style="height: 96px"/>
+      </a-form-item>
+      <a-form-item field="userRole" label="用户角色">
+        <a-select v-model="currentSUserAnswer.userRole" placeholder="请选择用户角色">
+          <a-option value="admin">admin</a-option>
+          <a-option value="user">user</a-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item disabled field="createTime" label="创建时间">
+        <a-input v-model="currentSUserAnswer.createTime" placeholder="请输入创建时间" />
+      </a-form-item>
+      <a-form-item disabled field="updateTime" label="更新时间">
+        <a-input v-model="currentSUserAnswer.updateTime" placeholder="请输入更新时间" />
+      </a-form-item>
+    </a-form>
 
-      <template #footer>
-        <a-button type="primary" @click="doUpdate(currentSUserAnswer)">确认</a-button>
-        <a-button style="background: white;color: black" type="primary" @click="()=>{
+    <template #footer>
+      <a-button type="primary" @click="doUpdate(currentSUserAnswer)">确认</a-button>
+      <a-button style="background: white;color: black" type="primary" @click="()=>{
           updateDrawerVisible = false
         }">取消</a-button>
-      </template>
-    </a-drawer>
+    </template>
+  </a-drawer>
 
 </template>
 

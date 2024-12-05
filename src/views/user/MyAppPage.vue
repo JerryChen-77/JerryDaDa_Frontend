@@ -127,15 +127,6 @@
           <a-space>
             <a-button
                 type="text"
-                status="warning"
-                @click="handleReview(record)"
-                v-if="record.reviewStatus === 0"
-            >
-              <template #icon><icon-check /></template>
-              审核
-            </a-button>
-            <a-button
-                type="text"
                 @click="handleUpdate(record)"
             >
               <template #icon><icon-edit /></template>
@@ -158,36 +149,7 @@
       </a-table>
     </a-card>
 
-    <!-- 审核弹窗 -->
-    <a-modal
-        v-model:visible="showReview"
-        title="应用审核"
-        @ok="doReview(ReviewModel)"
-        @cancel="() => showReview = false"
-        :ok-button-props="{ disabled: !ReviewModel.reviewStatus }"
-    >
-      <a-form :model="ReviewModel" layout="vertical">
-        <a-form-item label="应用名称">
-          <a-input v-model="ReviewModel.appName" disabled />
-        </a-form-item>
-        <a-form-item label="应用描述">
-          <a-input v-model="ReviewModel.appDesc" disabled />
-        </a-form-item>
-        <a-form-item label="审核状态" required>
-          <a-radio-group v-model="ReviewModel.reviewStatus">
-            <a-radio :value="1">通过</a-radio>
-            <a-radio :value="2">拒绝</a-radio>
-          </a-radio-group>
-        </a-form-item>
-        <a-form-item label="审核意见" v-if="ReviewModel.reviewStatus === 2">
-          <a-textarea
-              v-model="ReviewModel.reviewMessage"
-              placeholder="请输入拒绝原因"
-              :auto-size="{ minRows: 3, maxRows: 5 }"
-          />
-        </a-form-item>
-      </a-form>
-    </a-modal>
+
 
     <!-- 编辑抽屉 -->
     <a-drawer
@@ -247,8 +209,8 @@ import {
 import type { FormInstance } from '@arco-design/web-vue';
 import {
   deleteAppUsingPost,
-  doAppReviewUsingPost,
-  listAppVoByPageUsingPost,
+  doAppReviewUsingPost, editAppUsingPost,
+  listAppVoByPageUsingPost, listMyAppVoByPageUsingPost,
   updateAppUsingPost
 } from '@/api/appController';
 import type API from '@/api';
@@ -300,7 +262,7 @@ const getReviewStatusText = (status: number) => {
 const loadData = async () => {
   loading.value = true;
   try {
-    const res = await listAppVoByPageUsingPost(searchParams.value);
+    const res = await listMyAppVoByPageUsingPost(searchParams.value);
     if (res.data.code === 0) {
       dataList.value = res.data.data?.records || [];
       total.value = res.data.data?.total || 0;
@@ -333,31 +295,7 @@ const doClean = () => {
   doSearch();
 };
 
-// 审核
-const handleReview = (record: API.AppVO) => {
-  ReviewModel.value = { ...record };
-  showReview.value = true;
-};
 
-const doReview = async (record: any) => {
-  try {
-    const res = await doAppReviewUsingPost({
-      id: record.id,
-      reviewStatus: record.reviewStatus,
-      reviewMessage: record.reviewMessage
-    });
-
-    if (res.data.code === 0) {
-      Message.success('审核成功');
-      showReview.value = false;
-      await loadData();
-    } else {
-      Message.error(`审核失败：${res.data.message}`);
-    }
-  } catch (error) {
-    Message.error('操作失败，请重试');
-  }
-};
 
 // 更新
 const handleUpdate = (record: API.AppVO) => {
@@ -367,7 +305,7 @@ const handleUpdate = (record: API.AppVO) => {
 
 const doUpdate = async (record: API.AppVO) => {
   try {
-    const res = await updateAppUsingPost(record);
+    const res = await editAppUsingPost(record);
     if (res.data.code === 0) {
       Message.success('更新成功');
       updateDrawerVisible.value = false;

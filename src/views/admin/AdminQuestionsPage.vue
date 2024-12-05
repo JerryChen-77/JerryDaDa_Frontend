@@ -1,6 +1,6 @@
 <template>
 
-<!--  搜索条-->
+  <!--  搜索条-->
   <a-form
       style="margin-bottom: 20px"
       label-align="left"
@@ -29,7 +29,7 @@
       </a-button>
     </a-form-item>
   </a-form>
-<!--  表格内容-->
+  <!--  表格内容-->
   <a-table
       :ref="tableRef"
       :columns="columns"
@@ -73,51 +73,51 @@
     <div>您确认要删除题目吗，删除以后可能无法找回</div>
   </a-modal>
 
-    <!-- 抽屉组件 -->
-    <a-drawer
-        v-model:visible="updateDrawerVisible"
-        title="修改题目"
-        placement="right"
-        width="90%"
-    ><!-- 抽屉中的表单组件 -->
-      <a-form
-          :model="currentQuestion"
-          label-align="left"
-          auto-label-width
-          layout="vertical"
-      >
-        <a-form-item disabled field="id" label="问题ID">
-          <a-input v-model="currentQuestion.id" placeholder="请输入问题ID" />
-        </a-form-item>
-        <a-form-item disabled field="createTime" label="创建时间">
-          <a-input v-model="currentQuestion.createTime" placeholder="请输入创建时间" disabled />
-        </a-form-item>
-        <a-form-item disabled field="updateTime" label="更新时间" >
-          <a-input v-model="currentQuestion.updateTime" placeholder="请输入更新时间" disabled />
-        </a-form-item>
-        <a-form-item field="questionContent" label="问题内容">
-          <!-- 这里假设QuestionContentDTO有title和options等属性，你可以根据实际情况进一步细化渲染 -->
-          <a-input type="textarea" v-model="stringQuestionContent" placeholder="请输入问题内容" style="height: 96px" class="textarea-auto-wrap"/>
-        </a-form-item>
-        <a-form-item field="userId" label="用户ID">
-          <a-input v-model="currentQuestion.userId" placeholder="请输入用户ID" disabled />
-        </a-form-item>
+  <!-- 抽屉组件 -->
+  <a-drawer
+      v-model:visible="updateDrawerVisible"
+      title="修改题目"
+      placement="right"
+      width="90%"
+  ><!-- 抽屉中的表单组件 -->
+    <a-form
+        :model="currentQuestion"
+        label-align="left"
+        auto-label-width
+        layout="vertical"
+    >
+      <a-form-item disabled field="id" label="问题ID">
+        <a-input v-model="currentQuestion.id" placeholder="请输入问题ID" />
+      </a-form-item>
+      <a-form-item disabled field="createTime" label="创建时间">
+        <a-input v-model="currentQuestion.createTime" placeholder="请输入创建时间" disabled />
+      </a-form-item>
+      <a-form-item disabled field="updateTime" label="更新时间" >
+        <a-input v-model="currentQuestion.updateTime" placeholder="请输入更新时间" disabled />
+      </a-form-item>
+      <a-form-item field="questionContent" label="问题内容">
+        <!-- 这里假设QuestionContentDTO有title和options等属性，你可以根据实际情况进一步细化渲染 -->
+        <a-input type="textarea" v-model="stringQuestionContent" placeholder="请输入问题内容" style="height: 96px" class="textarea-auto-wrap"/>
+      </a-form-item>
+      <a-form-item field="userId" label="用户ID">
+        <a-input v-model="currentQuestion.userId" placeholder="请输入用户ID" disabled />
+      </a-form-item>
 
-        <a-form-item field="userName" label="用户名">
-          <a-input v-model="currentQuestionUser.userName" placeholder="请输入用户名" disabled />
-        </a-form-item>
-        <a-form-item field="appId" label="应用ID">
-          <a-input v-model="currentQuestion.appId" placeholder="请输入应用ID" disabled />
-        </a-form-item>
-      </a-form>
+      <a-form-item field="userName" label="用户名">
+        <a-input v-model="currentQuestionUser.userName" placeholder="请输入用户名" disabled />
+      </a-form-item>
+      <a-form-item field="appId" label="应用ID">
+        <a-input v-model="currentQuestion.appId" placeholder="请输入应用ID" disabled />
+      </a-form-item>
+    </a-form>
 
-      <template #footer>
-        <a-button type="primary" @click="doUpdate(currentQuestion)">确认</a-button>
-        <a-button style="background: white;color: black" type="primary" @click="()=>{
+    <template #footer>
+      <a-button type="primary" @click="doUpdate(currentQuestion)">确认</a-button>
+      <a-button style="background: white;color: black" type="primary" @click="()=>{
           updateDrawerVisible = false
         }">取消</a-button>
-      </template>
-    </a-drawer>
+    </template>
+  </a-drawer>
 
 </template>
 
@@ -203,11 +203,11 @@ const loadData = async ()=>{
 }
 
 const doClean = ()=>{
-    formSearchParams.value ={
-      userId:"",
-      appId:"",
-      id:""
-    }
+  formSearchParams.value ={
+    userId:"",
+    appId:"",
+    id:""
+  }
 }
 const doSearch = ()=>{
   searchParams.value ={

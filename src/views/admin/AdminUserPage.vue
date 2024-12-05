@@ -1,285 +1,477 @@
 <template>
+  <div class="user-management">
+    <!-- 页面标题 -->
+    <div class="page-header">
+      <h2>
+        <icon-user-group /> 用户管理
+      </h2>
+    </div>
 
-  <a-form
-      style="margin-bottom: 20px"
-      label-align="left"
-      auto-label-width
-      :model="searchParams"
-      layout="inline"
-      @submit="doSearch"
-  >
-    <a-form-item field="userName" label="用户名">
-      <a-input v-model="formSearchParams.userName" placeholder="请输入用户名" />
-    </a-form-item>
-    <a-form-item field="userProfile" label="用户简介">
-      <a-input v-model="formSearchParams.userProfile" placeholder="请输入用户简介" />
-    </a-form-item>
-    <a-form-item>
-      <a-button type="primary" html-type="submit" style="width: 80px">
-        搜索
-      </a-button>
-    </a-form-item>
-    <a-form-item>
-      <a-button type="primary" html-type="submit" @click="doClean" style="width: 80px">
-        重置
-      </a-button>
-    </a-form-item>
-  </a-form>
-  <a-table
-      :ref="tableRef"
-      :columns="columns"
-      :data="dataList"
-      :pagination="{
-    showTotal: true,
-    pageSize: searchParams.pageSize,
-    current: searchParams.current,
-    total,
-  }"
-      @page-change="onPageChange"
-  >
-    <template #userAvatar="{ record }">
-      <a-image :src="record.userAvatar" width="64px" height="50" />
-    </template>
+    <!-- 搜索区域 -->
+    <a-card class="search-card">
+      <a-form
+          :model="formSearchParams"
+          layout="horizontal"
+          @submit="doSearch"
+      >
+        <a-row :gutter="16">
+          <a-col :span="8">
+            <a-form-item field="userName" label="用户名">
+              <a-input
+                  v-model="formSearchParams.userName"
+                  placeholder="请输入用户名"
+                  allow-clear
+              >
+                <template #prefix>
+                  <icon-user />
+                </template>
+              </a-input>
+            </a-form-item>
+          </a-col>
+          <a-col :span="8">
+            <a-form-item field="userProfile" label="用户简介">
+              <a-input
+                  v-model="formSearchParams.userProfile"
+                  placeholder="请输入用户简介"
+                  allow-clear
+              >
+                <template #prefix>
+                  <icon-info-circle />
+                </template>
+              </a-input>
+            </a-form-item>
+          </a-col>
+          <a-col :span="8">
+            <a-space>
+              <a-button type="primary" html-type="submit">
+                <template #icon><icon-search /></template>
+                搜索
+              </a-button>
+              <a-button @click="doClean">
+                <template #icon><icon-refresh /></template>
+                重置
+              </a-button>
+            </a-space>
+          </a-col>
+        </a-row>
+      </a-form>
+    </a-card>
 
-    <template #optional="{ record }">
-      <a-space>
-        <a-button type="primary" @click="handleUpdate(record)">修改</a-button>
-        <a-button status="danger" @click="handleDelete(record)">删除</a-button>
-      </a-space>
-    </template>
+    <!-- 表格区域 -->
+    <a-card class="table-card">
+      <a-table
+          :data="dataList"
+          :columns="columns"
+          :loading="loading"
+          :pagination="{
+          showTotal: true,
+          showJumper: true,
+          pageSize: searchParams.pageSize,
+          current: searchParams.current,
+          total,
+          showPageSize: true,
+        }"
+          @page-change="onPageChange"
+          :bordered="false"
+          :stripe="true"
+          row-key="id"
+      >
+        <!-- 用户头像列 -->
+        <template #userAvatar="{ record }">
+          <a-image
+              :src="record.userAvatar"
+              width="64"
+              height="50"
+              :preview-visible="false"
+              fallback="https://p3-passport.byteimg.com/img/user-avatar/18e88966242b92cb4a4651840b85d680~100x100.awebp"
+          />
+        </template>
 
-    <template #createTime="{ record }">
-      {{ formatDate(record.createTime) }}
-    </template>
+        <!-- 用户角色列 -->
+        <template #userRole="{ record }">
+          <a-tag :color="record.userRole === 'admin' ? 'purple' : 'blue'">
+            {{ record.userRole.toUpperCase() }}
+          </a-tag>
+        </template>
 
-    <template #updateTime="{ record }">
-      {{ formatDate(record.updateTime) }}
-    </template>
-  </a-table>
+        <!-- 时间列 -->
+        <template #createTime="{ record }">
+          {{ dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss') }}
+        </template>
 
-  <a-modal v-model:visible="visible" @ok="handleOk(currentUser)" @cancel="handleCancel">
-    <template #title>
-      删除用户
-    </template>
-    <div>您确认要删除用户吗，删除以后可能无法找回</div>
-  </a-modal>
+        <template #updateTime="{ record }">
+          {{ dayjs(record.updateTime).format('YYYY-MM-DD HH:mm:ss') }}
+        </template>
 
+        <!-- 操作列 -->
+        <template #optional="{ record }">
+          <a-space>
+            <a-button
+                type="text"
+                @click="handleUpdate(record)"
+            >
+              <template #icon><icon-edit /></template>
+              修改
+            </a-button>
+            <a-popconfirm
+                content="确定要删除该用户吗？此操作不可恢复！"
+                position="left"
+                @ok="doDelete(record)"
+            >
+              <a-button
+                  type="text"
+                  status="danger"
+              >
+                <template #icon><icon-delete /></template>
+                删除
+              </a-button>
+            </a-popconfirm>
+          </a-space>
+        </template>
+      </a-table>
+    </a-card>
 
-
-    <!-- 抽屉组件 -->
+    <!-- 修改用户抽屉 -->
     <a-drawer
         v-model:visible="updateDrawerVisible"
-        title="修改用户"
+        title="修改用户信息"
         placement="right"
-        width="90%"
-    ><!-- 抽屉中的表单组件 -->
+        width="500px"
+        unmount-on-close
+    >
+      <template #header>
+        <a-space>
+          <icon-edit />
+          修改用户信息
+        </a-space>
+      </template>
+
       <a-form
+          ref="updateFormRef"
           :model="currentUser"
-          label-align="left"
-          auto-label-width
           layout="vertical"
+          :rules="rules"
       >
-        <a-form-item disabled field="id" label="ID">
-          <a-input v-model="currentUser.id" placeholder="请输入ID" />
+        <a-form-item field="id" label="用户ID" disabled>
+          <a-input v-model="currentUser.id" disabled />
         </a-form-item>
-        <a-form-item disabled field="userAccount" label="用户账号">
-          <a-input v-model="currentUser.userAccount" placeholder="请输入用户账号" />
+
+        <a-form-item field="userAccount" label="账号" disabled>
+          <a-input v-model="currentUser.userAccount" disabled />
         </a-form-item>
-        <a-form-item field="userName" label="用户名">
-          <a-input v-model="currentUser.userName" placeholder="请输入用户名" />
+
+        <a-form-item field="userName" label="用户名" required>
+          <a-input
+              v-model="currentUser.userName"
+              placeholder="请输入用户名"
+              allow-clear
+          />
         </a-form-item>
+
         <a-form-item field="userAvatar" label="用户头像">
-          <a-input v-model="currentUser.userAvatar" placeholder="请输入用户头像" />
+          <a-input
+              v-model="currentUser.userAvatar"
+              placeholder="请输入用户头像URL"
+              allow-clear
+          />
         </a-form-item>
-        <a-form-item field="userProfile" label="用户简介" >
-          <a-input type="text" v-model="currentUser.userProfile" placeholder="请输入用户简介" style="height: 96px"/>
+
+        <a-form-item field="userProfile" label="简介">
+          <a-textarea
+              v-model="currentUser.userProfile"
+              placeholder="请输入用户简介"
+              :max-length="200"
+              show-word-limit
+              allow-clear
+          />
         </a-form-item>
-        <a-form-item field="userRole" label="用户角色">
-          <a-select v-model="currentUser.userRole" placeholder="请选择用户角色">
-            <a-option value="admin">admin</a-option>
-            <a-option value="user">user</a-option>
-          </a-select>
+
+        <a-form-item field="userRole" label="角色">
+          <a-radio-group v-model="currentUser.userRole">
+            <a-radio value="user">普通用户</a-radio>
+            <a-radio value="admin">管理员</a-radio>
+          </a-radio-group>
         </a-form-item>
-        <a-form-item disabled field="createTime" label="创建时间">
-          <a-input v-model="currentUser.createTime" placeholder="请输入创建时间" />
+
+        <a-form-item field="createTime" label="创建时间" disabled>
+          <a-input v-model="currentUser.createTime" disabled />
         </a-form-item>
-        <a-form-item disabled field="updateTime" label="更新时间">
-          <a-input v-model="currentUser.updateTime" placeholder="请输入更新时间" />
+
+        <a-form-item field="updateTime" label="更新时间" disabled>
+          <a-input v-model="currentUser.updateTime" disabled />
         </a-form-item>
       </a-form>
 
       <template #footer>
-        <a-button type="primary" @click="doUpdate(currentUser)">确认</a-button>
-        <a-button style="background: white;color: black" type="primary" @click="()=>{
-          updateDrawerVisible = false
-        }">取消</a-button>
+        <a-space>
+          <a-button @click="updateDrawerVisible = false">取消</a-button>
+          <a-button
+              type="primary"
+              :loading="updating"
+              @click="doUpdate(currentUser)"
+          >
+            保存修改
+          </a-button>
+        </a-space>
       </template>
     </a-drawer>
-
+  </div>
 </template>
 
 <script setup lang="ts">
-// 表单数据
-const form = ref({
-  name: '',
-  email: '',
-  // 其他表单字段
+import { ref, watchEffect } from 'vue';
+import dayjs from 'dayjs';
+import { Message } from '@arco-design/web-vue';
+import type { FormInstance } from '@arco-design/web-vue';
+import {
+  IconUserGroup,
+  IconUser,
+  IconInfoCircle,
+  IconSearch,
+  IconRefresh,
+  IconEdit,
+  IconDelete,
+} from '@arco-design/web-vue/es/icon';
+import type API from '@/api';
+import {
+  deleteUserUsingPost,
+  listUserByPageUsingPost,
+  updateUserUsingPost,
+} from '@/api/userController';
+
+
+// 状态定义
+const loading = ref(false);
+const updating = ref(false);
+const updateFormRef = ref<FormInstance>();
+const dataList = ref<API.User[]>([]);
+const total = ref(0);
+const updateDrawerVisible = ref(false);
+const currentUser = ref<API.User>({});
+
+// 搜索参数
+const formSearchParams = ref<API.UserQueryRequest>({
+  userName: '',
+  userProfile: '',
 });
 
-
-import {ref, watchEffect} from "vue";
-import API from "@/api"
-import {deleteUserUsingPost, listUserByPageUsingPost, updateUserUsingPost} from "@/api/userController";
-import message from "@arco-design/web-vue/es/message";
-import {contains} from "@arco-design/web-vue/es/_utils/dom";
-
-const dataList = ref<API.User[]>([]);
-const total = ref<number>(0);
-
-const formSearchParams  = ref<API.UserQueryRequest>({});
-// 不能被修改
+// 分页参数
 const initSearchParams = {
   current: 1,
-  pageSize: 8,
-}
+  pageSize: 10,
+};
+
 const searchParams = ref<API.UserQueryRequest>({
   ...initSearchParams,
-})
+});
 
-const visible = ref(false);
-
-const currentUser = ref<API.User>({});
-const handleDelete = (record: API.User) => {
-  currentUser.value = record;
-  visible.value = true;
+// 表单验证规则
+const rules = {
+  userName: [
+    { required: true, message: '请输入用户名' },
+    { maxLength: 32, message: '用户名最长32个字符' },
+  ],
+  userProfile: [
+    { maxLength: 200, message: '简介最长200个字符' },
+  ],
 };
-// 抽屉显示状态
-const updateDrawerVisible = ref(false);
 
-// 显示抽屉的方法
-const handleUpdate = (record : API.User) => {
-  currentUser.value = record;
-  updateDrawerVisible.value = true;
-};
-const handleOk = (record : API.User) => {
-  doDelete(record);
-  visible.value = false;
-  message.warning("正在删除");
-
-};
-const handleCancel = () => {
-  visible.value = false;
-  message.info("取消删除");
-}
-
-// 格式化时间
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
-
-const loadData = async ()=>{
-  const res = await listUserByPageUsingPost(searchParams.value)
-  if(res.data.code === 0){
-    dataList.value = res.data.data?.records || [];
-    total.value = res.data.data?.total;
-  }else {
-    message.error("获取数据失败"+res.data.message)
-  }
-}
-
-const doClean = ()=>{
-    formSearchParams.value ={
-      userName:"",
-      userProfile:""
+// 加载数据
+const loadData = async () => {
+  loading.value = true;
+  try {
+    const res = await listUserByPageUsingPost(searchParams.value);
+    if (res.data.code === 0) {
+      dataList.value = res.data.data?.records || [];
+      total.value = res.data.data?.total || 0;
+    } else {
+      Message.error(`获取数据失败：${res.data.message}`);
     }
-}
-const doSearch = ()=>{
-  searchParams.value ={
+  } catch (error) {
+    Message.error('加载数据出错，请重试');
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 搜索
+const doSearch = () => {
+  searchParams.value = {
     ...initSearchParams,
     ...formSearchParams.value,
   };
-}
+};
 
-const doDelete = async (record: API.User)=>{
-  const res = await deleteUserUsingPost(record.id)
-  if(res.data.code === 0){
-    await loadData();
-  }else {
-    message.error("删除数据失败"+res.data.message)
+// 重置
+const doClean = () => {
+  formSearchParams.value = {
+    userName: '',
+    userProfile: '',
+  };
+  searchParams.value = { ...initSearchParams };
+};
+
+// 删除用户
+const doDelete = async (record: API.User) => {
+  try {
+    const res = await deleteUserUsingPost(record.id);
+    if (res.data.code === 0) {
+      Message.success('删除成功');
+      await loadData();
+    } else {
+      Message.error(`删除失败：${res.data.message}`);
+    }
+  } catch (error) {
+    Message.error('操作失败，请重试');
   }
-}
-// TODO更新
-const doUpdate = async (record: API.User)=>{
-  message.info("正在更新")
-  const res = await updateUserUsingPost({
-    ...record
-  })
-  if(res.data.code === 0){
-    await loadData();
-  }else {
-    message.error("更新数据失败"+res.data.message)
+};
+
+// 更新用户
+const doUpdate = async (record: API.User) => {
+  try {
+    await updateFormRef.value?.validate();
+    updating.value = true;
+    const res = await updateUserUsingPost(record);
+    if (res.data.code === 0) {
+      Message.success('更新成功');
+      updateDrawerVisible.value = false;
+      await loadData();
+    } else {
+      Message.error(`更新失败：${res.data.message}`);
+    }
+  } catch (error) {
+    if (error.type === 'form') {
+      Message.error('请检查表单填写是否正确');
+    } else {
+      Message.error('操作失败，请重试');
+    }
+  } finally {
+    updating.value = false;
   }
-  updateDrawerVisible.value = false;
-}
-watchEffect(()=>{
+};
+
+// 显示编辑抽屉
+const handleUpdate = (record: API.User) => {
+  currentUser.value = { ...record };
+  updateDrawerVisible.value = true;
+};
+
+// 分页变化
+const onPageChange = (page: number) => {
+  searchParams.value.current = page;
+};
+
+// 监听数据变化
+watchEffect(() => {
   loadData();
-})
-const onPageChange = (page: number)=>{
-  searchParams.value = {
-    ...searchParams.value,
-    current: page
-  }
-}
+});
 
+// 表格列配置
 const columns = [
   {
     title: 'ID',
     dataIndex: 'id',
+    width: 80,
   },
   {
     title: '用户名',
     dataIndex: 'userName',
+    width: 120,
   },
   {
-    title: '用户账号',
+    title: '账号',
     dataIndex: 'userAccount',
+    width: 120,
   },
   {
-    title: '用户头像',
+    title: '头像',
     dataIndex: 'userAvatar',
     slotName: 'userAvatar',
+    width: 80,
   },
   {
-    title: '用户简介',
+    title: '简介',
     dataIndex: 'userProfile',
-    ellipsis: true
+    ellipsis: true,
+    width: 200,
+  },
+  {
+    title: '角色',
+    dataIndex: 'userRole',
+    slotName: 'userRole',
+    width: 100,
   },
   {
     title: '创建时间',
     dataIndex: 'createTime',
     slotName: 'createTime',
+    width: 120,
   },
   {
     title: '更新时间',
     dataIndex: 'updateTime',
     slotName: 'updateTime',
-  },
-  {
-    title: '用户角色',
-    dataIndex: 'userRole',
+    width: 120,
   },
   {
     title: '操作',
-    dataIndex: 'optional',
     slotName: 'optional',
+    width: 160,
+    fixed: 'right',
+    align: 'center'
   },
 ];
-
 </script>
+
+<style scoped>
+.user-management {
+  padding: 16px;
+  background: var(--color-fill-2);
+  min-height: 100vh;
+}
+
+.page-header {
+  margin-bottom: 16px;
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-card {
+  margin-bottom: 16px;
+  background: white;
+  border-radius: 4px;
+}
+
+.table-card {
+  background: white;
+  border-radius: 4px;
+}
+
+:deep(.arco-table-th) {
+  background: var(--color-fill-2) !important;
+}
+
+:deep(.arco-upload-trigger) {
+  background: transparent;
+}
+
+:deep(.arco-form-item-label-col) {
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .user-management {
+    padding: 8px;
+  }
+
+  :deep(.arco-table-th) {
+    white-space: nowrap;
+  }
+}
+</style>

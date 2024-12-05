@@ -82,34 +82,34 @@
   ><!-- 抽屉中的表单组件 -->
     <a-form
         :model="currentScoringResult"
-    label-align="left"
-    auto-label-width
-    layout="vertical"
+        label-align="left"
+        auto-label-width
+        layout="vertical"
     >
-    <a-form-item disabled field="id" label="id">
-      <a-input v-model="currentScoringResult.id" placeholder="请输入id" disabled />
-    </a-form-item>
-    <a-form-item field="resultName" label="名称">
-      <a-input v-model="currentScoringResult.resultName" placeholder="请输入名称" />
-    </a-form-item>
-    <a-form-item field="resultDesc" label="描述">
-      <a-input v-model="currentScoringResult.resultDesc" placeholder="请输入描述"/>
-    </a-form-item>
-    <a-form-item field="resultProp" label="结果属性">
-      <a-input v-model="currentScoringResult.resultProp" placeholder="请输入结果属性"/>
-    </a-form-item>
-    <a-form-item field="resultScoreRange" label="评分范围">
-      <a-input v-model="currentScoringResult.resultScoreRange" placeholder="请输入评分范围"/>
-    </a-form-item>
-    <a-form-item field="appId" label="应用id">
-      <a-input v-model="currentScoringResult.appId" placeholder="请输入应用id" disabled/>
-    </a-form-item>
-    <a-form-item field="userId" label="用户id">
-      <a-input v-model="currentScoringResult.userId" placeholder="请输入用户id" disabled/>
-    </a-form-item>
-    <a-form-item disabled field="createTime" label="创建时间">
-      <a-input v-model="currentScoringResult.createTime" placeholder="请输入创建时间" disabled/>
-    </a-form-item>
+      <a-form-item disabled field="id" label="id">
+        <a-input v-model="currentScoringResult.id" placeholder="请输入id" disabled />
+      </a-form-item>
+      <a-form-item field="resultName" label="名称">
+        <a-input v-model="currentScoringResult.resultName" placeholder="请输入名称" />
+      </a-form-item>
+      <a-form-item field="resultDesc" label="描述">
+        <a-input v-model="currentScoringResult.resultDesc" placeholder="请输入描述"/>
+      </a-form-item>
+      <a-form-item field="resultProp" label="结果属性">
+        <a-input v-model="currentScoringResult.resultProp" placeholder="请输入结果属性"/>
+      </a-form-item>
+      <a-form-item field="resultScoreRange" label="评分范围">
+        <a-input v-model="currentScoringResult.resultScoreRange" placeholder="请输入评分范围"/>
+      </a-form-item>
+      <a-form-item field="appId" label="应用id">
+        <a-input v-model="currentScoringResult.appId" placeholder="请输入应用id" disabled/>
+      </a-form-item>
+      <a-form-item field="userId" label="用户id">
+        <a-input v-model="currentScoringResult.userId" placeholder="请输入用户id" disabled/>
+      </a-form-item>
+      <a-form-item disabled field="createTime" label="创建时间">
+        <a-input v-model="currentScoringResult.createTime" placeholder="请输入创建时间" disabled/>
+      </a-form-item>
 
     </a-form>
     <template #footer>

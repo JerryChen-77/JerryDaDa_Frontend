@@ -1,13 +1,13 @@
 <template>
   <div id="basicLayout">
     <a-layout style="height: 100vh">
-      <a-layout-header class="header">
+      <a-layout-header className="header">
         <GlobalHeader/>
       </a-layout-header>
-      <a-layout-content class="content">
+      <a-layout-content className="content">
         <router-view/>
       </a-layout-content>
-      <a-layout-footer class="footer">
+      <a-layout-footer className="footer">
         <a href="https://github.com/JerryChen-77" target="_blank" style="text-decoration: none;color: inherit">
           AI答题应用平台_BY_JERRY
         </a>

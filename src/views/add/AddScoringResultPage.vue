@@ -4,7 +4,8 @@
       <!-- 表单部分 -->
       <a-col :span="16">
         <div style="margin-bottom: 32px">
-          <h2>创建评分结果</h2>
+          <h2 v-if="!updateId">创建评分结果</h2>
+          <h2 v-else>修改评分结果</h2>
           <a-form
               :model="form"
               :style="{ width: '100%' }"
@@ -24,11 +25,17 @@
             <a-form-item field="resultDesc" label="结果描述">
               <a-input v-model="form.resultDesc" placeholder="请输入结果描述" />
             </a-form-item>
-            <a-form-item field="resultPicture" label="结果图标">
-              <a-input
-                  v-model="form.resultPicture"
-                  placeholder="请输入结果图标地址"
-              />
+            <a-form-item field="resultPicture" label="结果图片">
+              <div class="icon-upload-wrapper">
+                <PictureUploader
+                    biz="scoring_result_picture"
+                    :value="Pic_url"
+                    :onChange="handlePicChange"
+                />
+                <div class="icon-tips">
+                  建议尺寸：200x200px，支持 jpg、png 格式
+                </div>
+              </div>
             </a-form-item>
             <a-form-item field="resultProp" label="结果集">
               <a-input-tag
@@ -96,6 +103,7 @@ import {
 import { defineProps, withDefaults } from "vue/dist/vue";
 import ScoringResultTable from "@/views/add/components/ScoringResultTable.vue";
 import {update} from "lodash-es";
+import PictureUploader from "@/components/PictureUploader.vue";
 
 const submitting = ref(false);
 interface Props {
@@ -106,11 +114,13 @@ const props = withDefaults(defineProps<Props>(), {
   appId: () => "",
 });
 
+const Pic_url = ref<string>("");
 const form = reactive({
   resultDesc: "",
   resultName: "",
-  resultPicture: "",
+  // resultPicture: "",
 } as API.ScoringResultAddRequest);
+
 
 /**
  * 提交
@@ -131,18 +141,24 @@ const doUpdate = (scoringResult: API.ScoringResultVO) => {
   updateId.value = scoringResult.id;
   form.resultDesc = scoringResult.resultDesc;
   form.resultName = scoringResult.resultName;
-  form.resultPicture = scoringResult.resultPicture;
+  // form.resultPicture = scoringResult.resultPicture;
   form.resultProp = scoringResult.resultProp;
   form.resultScoreRange = scoringResult.resultScoreRange;
+  Pic_url.value =  scoringResult.resultPicture;
+};
+
+const handlePicChange = (url: string) => {
+  Pic_url.value = url;
 };
 
 const doClear = ()=>{
   updateId.value = undefined;
   form.resultDesc = "";
   form.resultName = "";
-  form.resultPicture = "";
+  // form.resultPicture = "";
   form.resultProp = [];
   form.resultScoreRange = undefined;
+  Pic_url.value = "";
 }
 const aiRecommand = ref([]);
 const aiGenerateScoreResult= async ()=>{
@@ -170,11 +186,13 @@ const handleSubmit = async () => {
   if (updateId.value) {
     res = await updateScoringResultUsingPost({
       id: updateId.value,
+      resultPicture:Pic_url.value,
       ...form,
     });
   } else {
     res = await addScoringResultUsingPost({
       appId: props.appId as any,
+      resultPicture:Pic_url.value,
       ...form,
     });
   }
@@ -190,3 +208,18 @@ const handleSubmit = async () => {
 };
 
 </script>
+
+<style scoped>
+.icon-upload-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+
+.icon-tips {
+  color: var(--color-text-3);
+  font-size: 12px;
+}
+
+</style>

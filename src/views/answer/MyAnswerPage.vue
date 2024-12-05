@@ -1,302 +1,362 @@
 <template>
+  <div class="answer-list-container">
+    <!-- 搜索表单 -->
+    <a-card class="search-card">
+      <a-form
+          :model="formSearchParams"
+          layout="horizontal"
+          @submit="doSearch"
+      >
+        <a-row :gutter="16">
+          <a-col :span="6">
+            <a-form-item field="resultName" label="结果名称">
+              <a-input
+                  v-model="formSearchParams.resultName"
+                  placeholder="请输入结果名称"
+                  allow-clear
+              >
+                <template #prefix>
+                  <icon-search />
+                </template>
+              </a-input>
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item field="resultDesc" label="结果描述">
+              <a-input
+                  v-model="formSearchParams.resultDesc"
+                  placeholder="请输入结果描述"
+                  allow-clear
+              >
+                <template #prefix>
+                  <icon-file />
+                </template>
+              </a-input>
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-form-item field="userId" label="创建人">
+              <a-input
+                  v-model="formSearchParams.userId"
+                  placeholder="请输入创建人ID"
+                  allow-clear
+              >
+                <template #prefix>
+                  <icon-user />
+                </template>
+              </a-input>
+            </a-form-item>
+          </a-col>
+          <a-col :span="6">
+            <a-space>
+              <a-button type="primary" html-type="submit">
+                <template #icon>
+                  <icon-search />
+                </template>
+                搜索
+              </a-button>
+              <a-button @click="doClean">
+                <template #icon>
+                  <icon-refresh />
+                </template>
+                重置
+              </a-button>
+            </a-space>
+          </a-col>
+        </a-row>
+      </a-form>
+    </a-card>
 
-  <a-form
-      style="margin-bottom: 20px"
-      label-align="left"
-      auto-label-width
-      :model="searchParams"
-      layout="inline"
-      @submit="doSearch"
-  >
-    <a-form-item field="resultName" label="结果名称">
-      <a-input v-model="formSearchParams.resultName" placeholder="请输入结果名称"/>
-    </a-form-item>
-    <a-form-item field="userProfile" label="结果描述">
-      <a-input v-model="formSearchParams.resultDesc" placeholder="请输入结果描述"/>
-    </a-form-item>
-    <a-form-item field="userId" label="创建人Id">
-      <a-input v-model="formSearchParams.userId" placeholder="请输入创建人Id"/>
-    </a-form-item>
-    <a-form-item>
-      <a-button type="primary" html-type="submit" style="width: 80px">
-        搜索
-      </a-button>
-    </a-form-item>
-    <a-form-item>
-      <a-button type="primary" html-type="submit" @click="doClean" style="width: 80px">
-        重置
-      </a-button>
-    </a-form-item>
-  </a-form>
-  <a-table
-      :ref="tableRef"
-      :columns="columns"
-      :data="dataList"
-      :pagination="{
-    showTotal: true,
-    pageSize: searchParams.pageSize,
-    current: searchParams.current,
-    total,
-  }"
-      @page-change="onPageChange"
-  >
-    <template #userAvatar="{ record }">
-      <a-image :src="record.userAvatar" width="64px" height="50" />
-    </template>
+    <!-- 数据表格 -->
+    <a-card class="table-card">
+      <template #title>
+        <a-space>
+          <icon-list /> 答案列表
+        </a-space>
+      </template>
 
-    <template #optional="{ record }">
-      <a-space>
-        <a-button :href="`/answer/result/${record.id}`">查看结果</a-button>
-        <a-button status="danger" @click="doDelete(record)">删除</a-button>
-      </a-space>
-    </template>
+      <a-table
+          :data="dataList"
+          :columns="columns"
+          :pagination="{
+          showTotal: true,
+          showJumper: true,
+          pageSize: searchParams.pageSize,
+          current: searchParams.current,
+          total,
+          showPageSize: true,
+        }"
+          :loading="loading"
+          @page-change="onPageChange"
+          :bordered="false"
+          :stripe="true"
+          row-key="id"
+      >
+        <!-- 图片列 -->
+        <template #resultPicture="{ record }">
+          <a-image
+              :src="record.resultPicture"
+              :preview-visible="false"
+              width="64"
+              height="64"
+              fit="cover"
+              border-radius="4px"
+          />
+        </template>
 
+        <!-- 应用类型列 -->
+        <template #appType="{ record }">
+          <a-tag :color="record.appType === 0 ? 'blue' : 'green'">
+            {{ record.appType === 0 ? '测评类' : '得分类' }}
+          </a-tag>
+        </template>
 
-    <template #appType="{record}">
-      <a-tag color="blue" v-if="record.appType === 0">测评类</a-tag>
-      <a-tag color="green" v-if="record.appType === 1">得分类</a-tag>
-    </template>
+        <!-- 评分策略列 -->
+        <template #scoringStrategy="{ record }">
+          <a-tag :color="record.scoringStrategy === 0 ? 'purple' : 'orange'">
+            {{ record.scoringStrategy === 0 ? '自定义' : 'AI评分' }}
+          </a-tag>
+        </template>
 
-    <template #scoringStrategy="{record}">
-      <a-tag color="purple" v-if="record.scoringStrategy === 0">自定义</a-tag>
-      <a-tag color="orange" v-if="record.scoringStrategy === 1">AI</a-tag>
-    </template>
+        <!-- 创建时间列 -->
+        <template #createTime="{ record }">
+          <a-tooltip :content="dayjs(record.createTime).format('YYYY-MM-DD HH:mm:ss')">
+            {{ dayjs(record.createTime).format('YYYY-MM-DD') }}
+          </a-tooltip>
+        </template>
 
-    <template #createTime="{ record }">
-      {{ dayjs(record.createTime).format("YYYY-MM-DD HH:mm:ss") }}
-    </template>
-
-  </a-table>
-
-  <a-modal v-model:visible="visible" @ok="handleOk(currentSUserAnswer)" @cancel="handleCancel">
-    <template #title>
-      删除用户回答
-    </template>
-    <div>您确认要删除此条用户回答吗，删除以后可能无法找回</div>
-  </a-modal>
-
-
-
-  <!-- 抽屉组件 -->
-  <a-drawer
-      v-model:visible="updateDrawerVisible"
-      title="修改用户"
-      placement="right"
-      width="90%"
-  ><!-- 抽屉中的表单组件 -->
-    <a-form
-        :model="currentSUserAnswer"
-        label-align="left"
-        auto-label-width
-        layout="vertical"
-    >
-      <a-form-item disabled field="id" label="ID">
-        <a-input v-model="currentSUserAnswer.id" placeholder="请输入ID" />
-      </a-form-item>
-      <a-form-item disabled field="userAccount" label="用户账号">
-        <a-input v-model="currentSUserAnswer.userAccount" placeholder="请输入用户账号" />
-      </a-form-item>
-      <a-form-item field="userName" label="用户名">
-        <a-input v-model="currentSUserAnswer.userName" placeholder="请输入用户名" />
-      </a-form-item>
-      <a-form-item field="userAvatar" label="用户头像">
-        <a-input v-model="currentSUserAnswer.userAvatar" placeholder="请输入用户头像" />
-      </a-form-item>
-      <a-form-item field="userProfile" label="用户简介" >
-        <a-input type="text" v-model="currentSUserAnswer.userProfile" placeholder="请输入用户简介" style="height: 96px"/>
-      </a-form-item>
-      <a-form-item field="userRole" label="用户角色">
-        <a-select v-model="currentSUserAnswer.userRole" placeholder="请选择用户角色">
-          <a-option value="admin">admin</a-option>
-          <a-option value="user">user</a-option>
-        </a-select>
-      </a-form-item>
-      <a-form-item disabled field="createTime" label="创建时间">
-        <a-input v-model="currentSUserAnswer.createTime" placeholder="请输入创建时间" />
-      </a-form-item>
-      <a-form-item disabled field="updateTime" label="更新时间">
-        <a-input v-model="currentSUserAnswer.updateTime" placeholder="请输入更新时间" />
-      </a-form-item>
-    </a-form>
-
-    <template #footer>
-      <a-button type="primary" @click="doUpdate(currentSUserAnswer)">确认</a-button>
-      <a-button style="background: white;color: black" type="primary" @click="()=>{
-          updateDrawerVisible = false
-        }">取消</a-button>
-    </template>
-  </a-drawer>
-
+        <!-- 操作列 -->
+        <template #optional="{ record }">
+          <a-space>
+            <a-button type="text" @click="viewResult(record)">
+              <template #icon><icon-eye /></template>
+              查看
+            </a-button>
+            <a-popconfirm
+                content="确定要删除这条记录吗？"
+                @ok="doDelete(record)"
+            >
+              <a-button type="text" status="danger">
+                <template #icon><icon-delete /></template>
+                删除
+              </a-button>
+            </a-popconfirm>
+          </a-space>
+        </template>
+      </a-table>
+    </a-card>
+  </div>
 </template>
 
 <script setup lang="ts">
-// 表单数据
-import dayjs from "dayjs";
-
-const form = ref({
-  name: '',
-  email: '',
-  // 其他表单字段
-});
-
-
-import {ref, watchEffect} from "vue";
-import API from "@/api"
-import {deleteUserUsingPost, listUserByPageUsingPost, updateUserUsingPost} from "@/api/userController";
-import message from "@arco-design/web-vue/es/message";
-import {contains} from "@arco-design/web-vue/es/_utils/dom";
+import { ref, watchEffect } from 'vue';
+import { useRouter } from 'vue-router';
+import { Message } from '@arco-design/web-vue';
+import dayjs from 'dayjs';
 import {
-  deleteUserAnswerUsingPost, listMyUserAnswerVoByPageUsingPost,
-  listUserAnswerVoByPageUsingPost,
-  updateUserAnswerUsingPost
-} from "@/api/userAnswerController";
+  IconSearch,
+  IconFile,
+  IconUser,
+  IconRefresh,
+  IconList,
+  IconEye,
+  IconDelete,
+} from '@arco-design/web-vue/es/icon';
+import type API from '@/api';
+import {
+  deleteUserAnswerUsingPost,
+  listMyUserAnswerVoByPageUsingPost,
+} from '@/api/userAnswerController';
 
+const router = useRouter();
+const loading = ref(false);
 const dataList = ref<API.UserAnswerVO[]>([]);
-const total = ref<number>(0);
+const total = ref(0);
 
-const formSearchParams  = ref<API.UserAnswerQueryRequest>({});
-// 不能被修改
+const formSearchParams = ref<API.UserAnswerQueryRequest>({});
 const initSearchParams = {
   current: 1,
-  pageSize: 8,
-}
+  pageSize: 10,
+};
+
 const searchParams = ref<API.UserAnswerQueryRequest>({
   ...initSearchParams,
-})
+});
 
-const visible = ref(false);
-
-const currentSUserAnswer = ref<API.UserAnswerVO>({});
-const handleDelete = (record: API.UserAnswerVO) => {
-  currentSUserAnswer.value = record;
-  visible.value = true;
-};
-// 抽屉显示状态
-const updateDrawerVisible = ref(false);
-
-// 显示抽屉的方法
-const handleUpdate = (record : API.UserAnswerVO) => {
-  currentSUserAnswer.value = record;
-  updateDrawerVisible.value = true;
-};
-const handleOk = (record : API.UserAnswerVO) => {
-  doDelete(record);
-  visible.value = false;
-  message.warning("正在删除");
-
-};
-const handleCancel = () => {
-  visible.value = false;
-  message.info("取消删除");
-}
-
-// 格式化时间
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
-  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-}
-
-const loadData = async ()=>{
-  const res = await listMyUserAnswerVoByPageUsingPost(searchParams.value)
-  if(res.data.code === 0){
-    dataList.value = res.data.data?.records || [];
-    total.value = res.data.data?.total;
-  }else {
-    message.error("获取数据失败"+res.data.message)
+// 加载数据
+const loadData = async () => {
+  loading.value = true;
+  try {
+    const res = await listMyUserAnswerVoByPageUsingPost(searchParams.value);
+    if (res.data.code === 0) {
+      dataList.value = res.data.data?.records || [];
+      total.value = res.data.data?.total || 0;
+    } else {
+      Message.error(`获取数据失败：${res.data.message}`);
+    }
+  } catch (error) {
+    Message.error('加载数据出错，请重试');
+  } finally {
+    loading.value = false;
   }
-}
+};
 
-
-const doSearch = ()=>{
-  searchParams.value ={
+// 搜索
+const doSearch = () => {
+  searchParams.value = {
     ...initSearchParams,
     ...formSearchParams.value,
   };
-}
+};
 
-const doDelete = async (record: API.UserAnswerVO)=>{
-  const res = await deleteUserAnswerUsingPost(record.id)
-  if(res.data.code === 0){
-    await loadData();
-  }else {
-    message.error("删除数据失败"+res.data.message)
+// 重置
+const doClean = () => {
+  formSearchParams.value = {};
+  searchParams.value = { ...initSearchParams };
+};
+
+// 删除
+const doDelete = async (record: API.UserAnswerVO) => {
+  try {
+    const res = await deleteUserAnswerUsingPost(record.id);
+    if (res.data.code === 0) {
+      Message.success('删除成功');
+      await loadData();
+    } else {
+      Message.error(`删除失败：${res.data.message}`);
+    }
+  } catch (error) {
+    Message.error('操作失败，请重试');
   }
-}
-// TODO更新
-const doUpdate = async (record: API.UserAnswerVO)=>{
-  message.info("正在更新")
-  const res = await updateUserAnswerUsingPost({
-    ...record
-  })
-  if(res.data.code === 0){
-    await loadData();
-  }else {
-    message.error("更新数据失败"+res.data.message)
-  }
-  updateDrawerVisible.value = false;
-}
-watchEffect(()=>{
+};
+
+// 查看详情
+const viewResult = (record: API.UserAnswerVO) => {
+  router.push(`/answer/result/${record.id}`);
+};
+
+// 分页变化
+const onPageChange = (page: number) => {
+  searchParams.value.current = page;
+};
+
+// 监听数据变化
+watchEffect(() => {
   loadData();
-})
-const onPageChange = (page: number)=>{
-  searchParams.value = {
-    ...searchParams.value,
-    current: page
-  }
-}
+});
 
 // 表格列配置
 const columns = [
   {
-    title: "应用 id",
-    dataIndex: "appId",
+    title: '应用ID',
+    dataIndex: 'appId',
+    width: 100,
   },
   {
-    title: "名称",
-    dataIndex: "resultName",
+    title: '名称',
+    dataIndex: 'resultName',
+    width: 150,
   },
   {
-    title: "描述",
-    dataIndex: "resultDesc",
+    title: '描述',
+    dataIndex: 'resultDesc',
+    width: 200,
+    ellipsis: true,
   },
   {
-    title: "选项",
-    dataIndex: "choices",
+    title: '选项',
+    dataIndex: 'choices',
+    width: 150,
+    ellipsis: true,
   },
   {
-    title: "图片",
-    dataIndex: "resultPicture",
-    slotName: "resultPicture",
+    title: '图片',
+    dataIndex: 'resultPicture',
+    slotName: 'resultPicture',
+    width: 100,
   },
   {
-    title: "得分",
-    dataIndex: "resultScore",
+    title: '得分',
+    dataIndex: 'resultScore',
+    width: 100,
   },
   {
-    title: "应用类型",
-    dataIndex: "appType",
-    slotName: "appType",
+    title: '应用类型',
+    dataIndex: 'appType',
+    slotName: 'appType',
+    width: 100,
   },
   {
-    title: "评分策略",
-    dataIndex: "scoringStrategy",
-    slotName: "scoringStrategy",
+    title: '评分策略',
+    dataIndex: 'scoringStrategy',
+    slotName: 'scoringStrategy',
+    width: 100,
   },
   {
-    title: "创建时间",
-    dataIndex: "createTime",
-    slotName: "createTime",
+    title: '创建时间',
+    dataIndex: 'createTime',
+    slotName: 'createTime',
+    width: 120,
   },
   {
-    title: "操作",
-    slotName: "optional",
+    title: '操作',
+    slotName: 'optional',
+    width: 150,
+    fixed: 'right',
   },
 ];
-
 </script>
+
+<style scoped>
+.answer-list-container {
+  padding: 16px;
+  background: var(--color-fill-2);
+  min-height: 100vh;
+}
+
+.search-card {
+  margin-bottom: 16px;
+  background: white;
+  border-radius: 4px;
+}
+
+.table-card {
+  background: white;
+  border-radius: 4px;
+}
+
+:deep(.arco-table-th) {
+  background: var(--color-fill-2) !important;
+}
+
+:deep(.arco-table-hover) {
+  transition: background-color 0.3s;
+}
+
+:deep(.arco-table-row:hover) {
+  background-color: var(--color-fill-2);
+}
+
+:deep(.arco-btn-text) {
+  padding: 0 4px;
+}
+
+:deep(.arco-image) {
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+:deep(.arco-tag) {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .answer-list-container {
+    padding: 8px;
+  }
+
+  :deep(.arco-table-th) {
+    white-space: nowrap;
+  }
+}
+</style>
